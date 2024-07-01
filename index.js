@@ -85,7 +85,7 @@ const Product = mongoose.model("Product", {
   },
 });
 
-// creatign apis for deleting products
+// Creating apis for deleting products
 
 app.post("/removeproduct", async (req, res) => {
   await Product.findOneAndDelete({ id: req.body.id });
@@ -101,6 +101,57 @@ app.get("/allproducts", async (req, res) => {
   let products = await Product.find({});
   console.log("All products fectched");
   res.send(products);
+});
+
+// Schema created for user model
+const Users = mongoose.model("Users", {
+  name: {
+    type: String,
+  },
+  email: {
+    type: String,
+    unique: true,
+  },
+  password: {
+    type: String,
+  },
+  cartData: {
+    type: Object,
+  },
+  date: {
+    type: Date,
+    default: Date.now,
+  },
+});
+
+// Creating Endpoint for registering the user
+app.post("/signup", async (req, res) => {
+  let check = await Users.findOne({ email: req.body.email });
+  if (check) {
+    return res
+      .status(400)
+      .json({ success: false, errors: "existing user or email found" });
+  }
+  let cart = {};
+  for (let i = 0; i < 300; i++) {
+    cart[i] = 0;
+  }
+  const user = new Users({
+    name: req.body.username,
+    email: req.body.email,
+    password: req.body.password,
+    cartData: cart,
+  });
+  await user.save();
+
+  const data = {
+    user: {
+      id: user.id,
+    },
+  };
+
+  const token = jwt.sign(data, "secret_ecom");
+  res.json({ success: true, token });
 });
 
 app.post("/addproduct", async (req, res) => {
