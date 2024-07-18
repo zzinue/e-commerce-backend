@@ -199,6 +199,13 @@ app.post("/addproduct", async (req, res) => {
     name: req.body.name,
   });
 });
+//  Creating endpoint for new collection data
+app.get("/newcollections", async (req, res) => {
+  let products = await Product.find({});
+  let newcollection = products.slice(1).slice(-8);
+  console.log("new collection fetched");
+  res.send(newcollection);
+});
 
 app.listen(port, (error) => {
   if (!error) {
